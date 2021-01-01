@@ -6,7 +6,7 @@ This is a quick switch port of the SDL port by [lemon-sherbet](https://github.co
 
 
 
-# Switch
+# Switch port
 
 To compile for the switch, you will need devkitPro with the following packages:
 
@@ -24,14 +24,14 @@ If you're stuck at the Loading screen, it could because the data folder could no
 
 
 
-# Original credits by lemon-sherbet (I replaced "I" by "lemon-sherbet")
+## Original credits by lemon-sherbet (I replaced "I" by "lemon-sherbet")
 
 Sound wave files are taken from [https://github.com/JeffRuLz/Celeste-Classic-GBA/tree/master/maxmod_data](https://github.com/JeffRuLz/Celeste-Classic-GBA/tree/master/maxmod_data),
 music ogg files were obtained by converting the .wav dumps from pico 8, which lemon-sherbet did using audacity & ffmpeg.
 
 All credit for the original game goes to the original developers (Matt Thorson & Noel Berry).
 
-#credits
+## credits
 
 I started working from [MVG (Lantus)](https://github.com/lantus) 's makefiles for the switch ports of [chocolate doom](https://github.com/lantus/chocolate-doom-nx) and [Cannonball (the Outrun engine)](https://github.com/lantus/cannonball-nx).
 
