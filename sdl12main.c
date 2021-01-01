@@ -89,7 +89,12 @@ static char* GetDataPath(char* path, int n, const char* fname) {
 #else
 	char pathsep = '/';
 #endif //_WIN32
+
+#ifdef SWITCH
+	snprintf(path, n, "cceleste%cdata%c%s", pathsep, pathsep, fname);
+#else
 	snprintf(path, n, "data%c%s", pathsep, fname);
+#endif //SWITCH
 #endif //_3DS
 
 	return path;
