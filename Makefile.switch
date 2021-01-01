@@ -1,0 +1,114 @@
+ifeq ($(strip $(DEVKITPRO)),)
+$(error "Please set DEVKITPRO in your environment. export DEVKITPRO=<path to>/devkitpro")
+endif
+
+TOPDIR ?= $(CURDIR)
+ 
+include $(DEVKITPRO)/libnx/switch_rules
+
+export BUILD_EXEFS_SRC := build/exefs
+
+APP_TITLE := cceleste
+APP_DESCRIPTION := cceleste
+APP_AUTHOR := __
+APP_VERSION := 1.0.0
+ICON := icon.png
+
+WINDRES   = windres.exe
+
+OBJ       = obj/sdl12main.o obj/celeste.o
+LINKOBJ   = obj/sdl12main.o obj/celeste.o
+LIBS      = -specs=$(DEVKITPRO)/libnx/switch.specs -g -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE -L$(DEVKITPRO)/libnx/lib -L$(DEVKITPRO)/portlibs/switch/lib  -lSDL2_mixer -lmpg123 -lmodplug -lvorbisidec -logg -lopusfile -lopus `sdl2-config --libs` -lm  -lstdc++ -lnx
+
+
+INCS      = -I$(DEVKITPRO)/portlibs/switch/include/SDL2 -I"src/main" -I$(DEVKITPRO)/libnx/include -I$(DEVKITPRO)/portlibs/switch/include
+CXXINCS   = -I$(DEVKITPRO)/portlibs/switch/include/SDL2 -I"src/main" -I$(DEVKITPRO)/libnx/include -I$(DEVKITPRO)/portlibs/switch/include
+BIN       = release/cceleste.elf
+BUILD	  =	build
+BINDIR	  = release
+DEFINES   =  -DSWITCH -DSDL2
+CXXFLAGS  = $(CXXINCS) $(DEFINES) -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE -O3
+CFLAGS    = $(INCS) $(DEFINES)    -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIE -O3
+GPROF     = gprof.exe
+RM        = rm -f
+# LINK      = aarch64-none-elf-g++ 
+# CPP		  = aarch64-none-elf-g++
+
+LINK      = aarch64-none-elf-gcc
+CC        = aarch64-none-elf-gcc 
+
+OUTPUT    = cceleste
+
+
+ifeq ($(strip $(ICON)),)
+	icons := $(wildcard *.jpg)
+	ifneq (,$(findstring $(TARGET).jpg,$(icons)))
+		export APP_ICON := $(TOPDIR)/$(TARGET).jpg
+	else
+		ifneq (,$(findstring icon.jpg,$(icons)))
+			export APP_ICON := $(TOPDIR)/icon.jpg
+		endif
+	endif
+else
+	export APP_ICON := $(TOPDIR)/$(ICON)
+endif
+
+ifeq ($(strip $(NO_ICON)),)
+	export NROFLAGS += --icon=$(APP_ICON)
+endif
+
+ifeq ($(strip $(NO_NACP)),)
+	export NROFLAGS += --nacp=$(BINDIR)/$(OUTPUT).nacp
+endif
+
+ifneq ($(APP_TITLEID),)
+	export NACPFLAGS += --titleid=$(APP_TITLEID)
+endif
+
+ifneq ($(ROMFS),)
+	export NROFLAGS += --romfsdir=$(CURDIR)/$(ROMFS)
+endif
+
+
+.PHONY: all all-before all-after clean clean-custom
+all: all-before $(BIN) all-after
+	mkdir -p release/cceleste
+	cp -r data release/cceleste
+	cp release/cceleste.nro release/cceleste/cceleste.nro 
+
+clean: clean-custom
+	$(RM) $(OBJ) $(BIN)
+
+$(BIN): $(LINKOBJ) celeste.h
+	mkdir -p release
+	$(LINK) $(LINKOBJ) -o "release/cceleste.elf" $(LIBS)
+
+obj/sdl12main.o: $(GLOBALDEPS) obj/celeste.o
+	$(CC) -c sdl12main.c -o obj/sdl12main.o $(CFLAGS)
+
+obj/celeste.o: $(GLOBALDEPS) celeste.c celeste.h 
+	mkdir -p obj 
+	$(CC) -c celeste.c -o obj/celeste.o $(CFLAGS)
+
+
+
+#---------------------------------------------------------------------------------
+# main targets
+#---------------------------------------------------------------------------------
+all	:	$(BINDIR)/$(OUTPUT).pfs0 $(BINDIR)/$(OUTPUT).nro 
+
+$(BINDIR)/$(OUTPUT).pfs0	:	$(BINDIR)/$(OUTPUT).nso
+
+$(BINDIR)/$(OUTPUT).nso	:	$(BINDIR)/$(OUTPUT).elf
+
+ifeq ($(strip $(NO_NACP)),)
+$(BINDIR)/$(OUTPUT).nro	:	$(BINDIR)/$(OUTPUT).elf $(BINDIR)/$(OUTPUT).nacp
+else
+$(BINDIR)/$(OUTPUT).nro	:	$(BINDIR)/$(OUTPUT).elf
+endif
+
+$(BINDIR)/$(OUTPUT).elf	:	$(OFILES)
+
+$(OFILES_SRC)	: $(HFILES_BIN)
+	
+# end of Makefile ...
